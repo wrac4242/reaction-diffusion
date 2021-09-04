@@ -15,7 +15,6 @@ if possible it should be able to:
 - allow screen video output
 - allow easy starting configuration changes
 - allow images to be inputted as a starting configuration - will need to be converted to gray scale
-- allow the option for screen wrapping as needed
 - allow dynamic painting
 - allow GPU usage
 
