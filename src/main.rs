@@ -1,6 +1,7 @@
-fn main() {
-    println!("Hello, world!");
-}
+extern crate image;
+use std::fs;
+use std::path::Path;
+use std::cmp;
 
 /*
 setup
@@ -24,6 +25,9 @@ const FEED: f64 = 0.055;
 const KILL: f64 = 0.062;
 const DELTA_T: f64 = 1.0;
 
+const HEIGHT: usize = 100;
+const WIDTH: usize = 100;
+
 impl Cell {
     fn new() -> Cell {
         Cell { a: 0.0, b: 0.0, a_buf: 0.0, b_buf: 0.0 }
@@ -37,18 +41,22 @@ impl Cell {
     }
 
     fn set(&mut self, a: f64, b: f64) {
-      self.a = a;
-      self.b = b;
+      self.a_buf = a;
+      self.b_buf = b;
     }
 
     fn buf_swap(&mut self) {
-      self.a = self.b_buf;
+      self.a = self.a_buf;
       self.b = self.b_buf;
     }
-}
 
-const HEIGHT: usize = 100;
-const WIDTH: usize = 100;
+    fn colour(&mut self) -> [u8; 3] {
+      // returns the colour of the cell
+
+      // for testing purposes
+      [ 0 , 0, cmp::min((self.b * 255.0).trunc() as u8, 255) ]
+    }
+}
 
 struct Grid {
     pub grid: Vec<Vec<Cell>>,
@@ -67,7 +75,7 @@ impl Grid {
           t.push(t2);
         }
         t
-    }
+      }
     }
   }
 
@@ -95,5 +103,44 @@ impl Grid {
       }
     }
   }
+
+  fn render(&mut self, frame: u64) {
+    let mut imgbuf = image::ImageBuffer::new(WIDTH as u32, HEIGHT as u32);
+
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+      *pixel = image::Rgb(self.grid[x as usize][y as usize].colour());
+    }
+
+    // saves the frame 
+    let path_str = format!("./output/{}.png", frame);
+    let path = Path::new(&path_str);
+    imgbuf.save(path).unwrap();
+  }
+
+  fn starting_configure(&mut self) {
+    for x in 1..WIDTH-1 {
+      for y in 1..HEIGHT-1 {
+        if x < 55 && x > 55 && y < 55 && y > 55 {
+          self.grid[x][y].set( 0.0, 1.0 );
+          self.grid[x][y].buf_swap();
+        }
+      }
+    }
+  }
 }
 
+const MAX_FRAMES: usize = 10;
+
+fn main() {
+  fs::create_dir_all("./output").unwrap();
+
+  println!("creating");
+  let mut array = Grid::new();
+  array.starting_configure();
+
+  for i in 0..MAX_FRAMES {
+    array.update();
+    array.render(i as u64);
+  }
+  println!("done")
+}
