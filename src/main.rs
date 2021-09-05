@@ -20,13 +20,13 @@ struct Cell {
 }
 
 const DIFF_A: f64 = 1.0; // diffusion of A 
-const DIFF_B: f64 = 1.0;
+const DIFF_B: f64 = 0.5;
 const FEED: f64 = 0.055;
 const KILL: f64 = 0.062;
 const DELTA_T: f64 = 1.0;
 
-const HEIGHT: usize = 100;
-const WIDTH: usize = 100;
+const HEIGHT: usize = 1000;
+const WIDTH: usize = 1000;
 
 impl Cell {
     fn new() -> Cell {
@@ -82,11 +82,6 @@ impl Grid {
   fn update(&mut self,) {
     for x in 1..WIDTH-1 {
       for y in 1..HEIGHT-1 {
-        /*
-        0.05  0.2  0.05 
-        0.2   -1   -.2 
-        0.05  0.2  0.05 
-        */
         let lap_a = 0.05 * (self.grid[x+1][y-1].a + self.grid[x+1][y+1].a + self.grid[x-1][y-1].a + self.grid[x-1][y+1].a) 
           + 0.2 * (self.grid[x+1][y].a + self.grid[x-1][y].a + self.grid[x][y-1].a + self.grid[x][y+1].a)
           - self.grid[x][y].a;
@@ -120,7 +115,7 @@ impl Grid {
   fn starting_configure(&mut self) {
     for x in 1..WIDTH-1 {
       for y in 1..HEIGHT-1 {
-        if x < 55 && x > 55 && y < 55 && y > 55 {
+        if x % 100 >= 80 && y % 100 >= 80 {
           self.grid[x][y].set( 0.0, 1.0 );
           self.grid[x][y].buf_swap();
         }
@@ -140,7 +135,98 @@ fn main() {
 
   for i in 0..MAX_FRAMES {
     array.update();
+    println!("saving frame {}", i);
     array.render(i as u64);
+    println!("done with frame {}", i);
   }
-  println!("done")
+  println!("done");
+}
+
+#[cfg(test)]
+mod checks_cell_update {
+    use super::*;
+    #[test]
+    fn a_surround() {
+        /*
+        0.05  0.2  0.05 
+        0.2   -1   0.2 
+        0.05  0.2  0.05 
+        */ // goes to 1 if centre is 0
+
+        let mut cell = Cell::new();
+        cell.update(1.0, 0.0);
+        cell.buf_swap();
+
+        assert_eq!(cell.a, 1.055);
+        assert_eq!(cell.b, 0.0);
+    }
+
+    #[test]
+    fn b_surround() {
+      /*
+      0.05  0.2  0.05 
+      0.2   -1   0.2 
+      0.05  0.2  0.05 
+      */ // goes to 1 if centre is 0
+
+      let mut cell = Cell::new();
+      cell.update(0.0, 1.0);
+      cell.buf_swap();
+
+      assert_eq!(cell.a, 0.055);
+      assert_eq!(cell.b, 0.5);
+    }
+    #[test]
+    fn a_in() {
+      /*
+      0.05  0.2  0.05 
+      0.2   -1   0.2 
+      0.05  0.2  0.05 
+      */ // goes to 1 if centre is 0
+
+      let mut cell = Cell::new();
+      cell.set(1.0, 0.0);
+      cell.buf_swap();
+      cell.update(0.0, 1.0);
+      cell.buf_swap();
+
+      assert_eq!(cell.a, 1.0);
+      assert_eq!(cell.b, 0.5);
+    }
+
+    #[test]
+    fn b_in() {
+      /*
+      0.05  0.2  0.05 
+      0.2   -1   0.2 
+      0.05  0.2  0.05 
+      */ // goes to 1 if centre is 0
+
+      let mut cell = Cell::new();
+      cell.set(0.0, 1.0);
+      cell.buf_swap();
+      cell.update(1.0, 0.0);
+      cell.buf_swap();
+
+      assert_eq!(cell.a, 1.055 );
+      assert_eq!(cell.b, 0.883 );
+  }
+
+  #[test]
+  fn both_in() {
+    /*
+    0.05  0.2  0.05 
+    0.2   -1   0.2 
+    0.05  0.2  0.05 
+    */ // goes to 1 if centre is 0
+
+    let mut cell = Cell::new();
+    cell.set(1.0, 1.0);
+    cell.buf_swap();
+    cell.update(1.0, 1.0);
+    cell.buf_swap();
+
+    assert_eq!(cell.a, 1.0);
+    assert_eq!(cell.b, 2.383);
+  }
 }
