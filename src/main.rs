@@ -80,20 +80,73 @@ impl Grid {
   }
 
   fn update(&mut self,) {
-    for x in 1..WIDTH-1 {
-      for y in 1..HEIGHT-1 {
-        let lap_a = 0.05 * (self.grid[x+1][y-1].a + self.grid[x+1][y+1].a + self.grid[x-1][y-1].a + self.grid[x-1][y+1].a) 
-          + 0.2 * (self.grid[x+1][y].a + self.grid[x-1][y].a + self.grid[x][y-1].a + self.grid[x][y+1].a)
+    for x in 0..WIDTH {
+      for y in 0..HEIGHT {
+        // extra code needed to wrap around
+        /*
+        let lap_a = 0.05 * 
+            (self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].a
+          ) 
+          + 0.2 * 
+            (self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].a 
+            + self.grid[((x) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].a
+          )
           - self.grid[x][y].a;
-        let lap_b = 0.05 * (self.grid[x+1][y-1].b + self.grid[x+1][y+1].b + self.grid[x-1][y-1].b + self.grid[x-1][y+1].b) 
-          + 0.2 * (self.grid[x+1][y].b + self.grid[x-1][y].b + self.grid[x][y-1].b + self.grid[x][y+1].b)
+
+        let lap_b = 0.05 * 
+            (self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].b 
+            + self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].b
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].b
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].b
+          ) 
+          + 0.2 * 
+            (self.grid[((x+1) as i64).rem_euclid(WIDTH as i64) as usize][((y) as i64).rem_euclid(WIDTH as i64) as usize].b 
+            + self.grid[((x-1) as i64).rem_euclid(WIDTH as i64) as usize][((y) as i64).rem_euclid(WIDTH as i64) as usize].b
+            + self.grid[((x) as i64).rem_euclid(WIDTH as i64) as usize][((y-1) as i64).rem_euclid(WIDTH as i64) as usize].b 
+            + self.grid[((x) as i64).rem_euclid(WIDTH as i64) as usize][((y+1) as i64).rem_euclid(WIDTH as i64) as usize].b
+          )
           - self.grid[x][y].b;
+        */
+
+        let lap_a = 0.05 * 
+            (self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
+            + self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_add(1) % HEIGHT].a 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_add(1) % HEIGHT].a
+          ) 
+          + 0.2 * 
+            (self.grid[x.wrapping_add(1) % WIDTH][y % HEIGHT].a 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y % HEIGHT].a 
+            + self.grid[x % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
+            + self.grid[x % WIDTH][y.wrapping_add(1) % HEIGHT].a
+          )
+          - self.grid[x][y].a;
+
+        let lap_b = 0.05 * 
+            (self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
+            + self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_add(1) % HEIGHT].b 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_add(1) % HEIGHT].b
+          ) 
+          + 0.2 * 
+            (self.grid[x.wrapping_add(1) % WIDTH][y % HEIGHT].b 
+            + self.grid[x.wrapping_sub(1) % WIDTH][y % HEIGHT].b 
+            + self.grid[x % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
+            + self.grid[x % WIDTH][y.wrapping_add(1) % HEIGHT].b
+          )
+          - self.grid[x][y].b;
+
         self.grid[x][y].update(lap_a, lap_b);
       }
     }
 
-    for x in 1..WIDTH-1 {
-      for y in 1..HEIGHT-1 {
+    for x in 0..WIDTH {
+      for y in 0..HEIGHT {
         self.grid[x][y].buf_swap();
       }
     }
@@ -113,8 +166,8 @@ impl Grid {
   }
 
   fn starting_configure(&mut self) {
-    for x in 1..WIDTH-1 {
-      for y in 1..HEIGHT-1 {
+    for x in 0..WIDTH {
+      for y in 0..HEIGHT {
         if x % 100 >= 80 && y % 100 >= 80 {
           self.grid[x][y].set( 0.0, 1.0 );
           self.grid[x][y].buf_swap();
@@ -124,7 +177,7 @@ impl Grid {
   }
 }
 
-const MAX_FRAMES: usize = 10;
+const MAX_FRAMES: usize = 100;
 
 fn main() {
   fs::create_dir_all("./output").unwrap();
@@ -136,9 +189,10 @@ fn main() {
   for i in 0..MAX_FRAMES {
     array.update();
     println!("saving frame {}", i);
-    array.render(i as u64);
+    // array.render(i as u64);
     println!("done with frame {}", i);
   }
+  array.render(666);
   println!("done");
 }
 
