@@ -60,28 +60,30 @@ impl Cell {
 
 struct Grid {
     pub grid: Vec<Vec<Cell>>,
+    height: usize, 
+    width: usize
 }
 
 impl Grid {
-  fn new() -> Grid {
+  fn new(height: usize, width: usize) -> Grid {
     Grid { 
       grid: {
         let mut t = Vec::new();
-        for _x in 0..WIDTH {
+        for _x in 0..width {
           let mut t2 = Vec::new();
-          for _y in 0..HEIGHT {
+          for _y in 0..height {
             t2.push(Cell::new());
           }
           t.push(t2);
         }
         t
-      }
+      }, height, width
     }
   }
 
   fn update(&mut self,) {
-    for x in 0..WIDTH {
-      for y in 0..HEIGHT {
+    for x in 0..self.width {
+      for y in 0..self.height {
         // extra code needed to wrap around
         /*
         let lap_a = 0.05 * 
@@ -114,30 +116,30 @@ impl Grid {
         */
 
         let lap_a = 0.05 * 
-            (self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].a 
-            + self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].a 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].a 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].a
+            (self.grid[((x + self.width) + 1) % self.width][((y + self.height) - 1) % self.height].a 
+            + self.grid[((x + self.width) + 1) % self.width][((y + self.height) + 1) % self.height].a 
+            + self.grid[((x + self.width) - 1) % self.width][((y + self.height) - 1) % self.height].a 
+            + self.grid[((x + self.width) - 1) % self.width][((y + self.height) + 1) % self.height].a
           ) 
           + 0.2 * 
-            (self.grid[((x + WIDTH) + 1) % WIDTH][y].a 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][y].a 
-            + self.grid[x][((y + WIDTH) - 1) % WIDTH].a 
-            + self.grid[x][((y + WIDTH) + 1) % WIDTH].a
+            (self.grid[((x + self.width) + 1) % self.width][y].a 
+            + self.grid[((x + self.width) - 1) % self.width][y].a 
+            + self.grid[x][((y + self.height) - 1) % self.height].a 
+            + self.grid[x][((y + self.height) + 1) % self.height].a
           )
           - self.grid[x][y].a;
 
         let lap_b = 0.05 * 
-            (self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].b 
-            + self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].b 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].b 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].b
+            (self.grid[((x + self.width) + 1) % self.width][((y + self.height) - 1) % self.height].b 
+            + self.grid[((x + self.width) + 1) % self.width][((y + self.height) + 1) % self.height].b 
+            + self.grid[((x + self.width) - 1) % self.width][((y + self.height) - 1) % self.height].b 
+            + self.grid[((x + self.width) - 1) % self.width][((y + self.height) + 1) % self.height].b
           ) 
           + 0.2 * 
-            (self.grid[((x + WIDTH) + 1) % WIDTH][y].b 
-            + self.grid[((x + WIDTH) - 1) % WIDTH][y].b 
-            + self.grid[x][((y + WIDTH) - 1) % WIDTH].b 
-            + self.grid[x][((y + WIDTH) + 1) % WIDTH].b
+            (self.grid[((x + self.width) + 1) % self.width][y].b 
+            + self.grid[((x + self.width) - 1) % self.width][y].b 
+            + self.grid[x][((y + self.height) - 1) % self.height].b 
+            + self.grid[x][((y + self.height) + 1) % self.height].b
           )
           - self.grid[x][y].b;
 
@@ -145,15 +147,15 @@ impl Grid {
       }
     }
 
-    for x in 0..WIDTH {
-      for y in 0..HEIGHT {
+    for x in 0..self.width {
+      for y in 0..self.height {
         self.grid[x][y].buf_swap();
       }
     }
   }
 
   fn render(&mut self, frame: u64) {
-    let mut imgbuf = image::ImageBuffer::new(WIDTH as u32, HEIGHT as u32);
+    let mut imgbuf = image::ImageBuffer::new(self.width as u32, self.height as u32);
 
     for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
       *pixel = image::Rgb(self.grid[x as usize][y as usize].colour());
@@ -166,8 +168,8 @@ impl Grid {
   }
 
   fn starting_configure(&mut self) {
-    for x in 0..WIDTH {
-      for y in 0..HEIGHT {
+    for x in 0..self.width {
+      for y in 0..self.height {
         if x % 100 >= 80 && y % 100 >= 80 {
           self.grid[x][y].set( 0.0, 1.0 );
           self.grid[x][y].buf_swap();
@@ -177,13 +179,13 @@ impl Grid {
   }
 }
 
-const MAX_FRAMES: usize = 10;
+const MAX_FRAMES: usize = 100;
 
 fn main() {
   fs::create_dir_all("./output").unwrap();
 
   println!("creating");
-  let mut array = Grid::new();
+  let mut array = Grid::new(HEIGHT, WIDTH);
   array.starting_configure();
 
   for i in 0..MAX_FRAMES {
@@ -282,5 +284,14 @@ mod checks_cell_update {
 
     assert_eq!(cell.a, 1.0);
     assert_eq!(cell.b, 2.383);
+  }
+}
+
+#[cfg(test)]
+mod check_grid {
+  use super::*;
+  #[test]
+  fn grid_test() {
+    let mut array = Grid::new(3, 3);
   }
 }
