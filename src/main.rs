@@ -114,30 +114,30 @@ impl Grid {
         */
 
         let lap_a = 0.05 * 
-            (self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
-            + self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_add(1) % HEIGHT].a 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_add(1) % HEIGHT].a
+            (self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].a 
+            + self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].a 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].a 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].a
           ) 
           + 0.2 * 
-            (self.grid[x.wrapping_add(1) % WIDTH][y % HEIGHT].a 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y % HEIGHT].a 
-            + self.grid[x % WIDTH][y.wrapping_sub(1) % HEIGHT].a 
-            + self.grid[x % WIDTH][y.wrapping_add(1) % HEIGHT].a
+            (self.grid[((x + WIDTH) + 1) % WIDTH][y].a 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][y].a 
+            + self.grid[x][((y + WIDTH) - 1) % WIDTH].a 
+            + self.grid[x][((y + WIDTH) + 1) % WIDTH].a
           )
           - self.grid[x][y].a;
 
         let lap_b = 0.05 * 
-            (self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
-            + self.grid[x.wrapping_add(1) % WIDTH][y.wrapping_add(1) % HEIGHT].b 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y.wrapping_add(1) % HEIGHT].b
+            (self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].b 
+            + self.grid[((x + WIDTH) + 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].b 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) - 1) % WIDTH].b 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][((y + WIDTH) + 1) % WIDTH].b
           ) 
           + 0.2 * 
-            (self.grid[x.wrapping_add(1) % WIDTH][y % HEIGHT].b 
-            + self.grid[x.wrapping_sub(1) % WIDTH][y % HEIGHT].b 
-            + self.grid[x % WIDTH][y.wrapping_sub(1) % HEIGHT].b 
-            + self.grid[x % WIDTH][y.wrapping_add(1) % HEIGHT].b
+            (self.grid[((x + WIDTH) + 1) % WIDTH][y].b 
+            + self.grid[((x + WIDTH) - 1) % WIDTH][y].b 
+            + self.grid[x][((y + WIDTH) - 1) % WIDTH].b 
+            + self.grid[x][((y + WIDTH) + 1) % WIDTH].b
           )
           - self.grid[x][y].b;
 
@@ -177,7 +177,7 @@ impl Grid {
   }
 }
 
-const MAX_FRAMES: usize = 100;
+const MAX_FRAMES: usize = 10;
 
 fn main() {
   fs::create_dir_all("./output").unwrap();
